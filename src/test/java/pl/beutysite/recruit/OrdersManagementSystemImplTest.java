@@ -42,10 +42,13 @@ public class OrdersManagementSystemImplTest {
         assertThat(nextOrder).isNotNull();
         assertThat(nextOrder.getItemId()).isEqualTo(2);
 
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+
+        //then
+        assertThat(nextOrder).isNotNull();
+        assertThat(nextOrder.getItemId()).isEqualTo(1);
     }
 
-    //Ignoring cause assertion is failing with small difference in tax amount - should be nothing serious
-    @Ignore
     @Test
     public void tax_amount_sent_to_tax_office_should_be_correct() {
 
@@ -60,10 +63,68 @@ public class OrdersManagementSystemImplTest {
         assertThat(nextOrder).isNotNull();
 
         //should be 0.77 tax because:
-        // 3.33 + 1.5% = 3.38   3.38 * 23.5% = 0.80
-        verify(taxOfficeAdapter).registerTax(new BigDecimal("0.80"));
+        // 3.33 + 1.5% = 3.38   3.38 * 23.5% = 0.79
+        verify(taxOfficeAdapter).registerTax(new BigDecimal("0.79"));
     }
 
+    @Test
+    public void testPriorityOrdersShouldBeFetchedFirst() {
+
+        //given
+        given(itemsRepository.fetchItemPrice(1)).willReturn(new BigDecimal("5.00"));
+        given(itemsRepository.fetchItemPrice(2)).willReturn(new BigDecimal("10.00"));
+
+        //when
+        ordersManagementSystem.createOrder(2,1,OrderFlag.PRIORITY);
+        ordersManagementSystem.createOrder(1,2,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(2,3,OrderFlag.PRIORITY);
+        ordersManagementSystem.createOrder(1,4,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(1,5,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(1,6,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(2,7,OrderFlag.PRIORITY);
+        ordersManagementSystem.createOrder(1,8,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(2,9,OrderFlag.PRIORITY);
+        ordersManagementSystem.createOrder(1,10,OrderFlag.STANDARD);
+        ordersManagementSystem.createOrder(1,11,OrderFlag.PRIORITY);
+
+        Order nextOrder = null;
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(1);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(3);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(7);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(9);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(11);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(2);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(4);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(5);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(6);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(8);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder.getCustomerId()).isEqualTo(10);
+
+        nextOrder = ordersManagementSystem.fetchNextOrder();
+        assertThat(nextOrder).isNull();
+    }
 
 
 }

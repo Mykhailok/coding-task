@@ -6,8 +6,7 @@ import pl.beutysite.recruit.orders.Order;
 import pl.beutysite.recruit.orders.PriorityOrder;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class OrdersManagementSystemImpl implements OrdersManagementSystem {
 
@@ -16,39 +15,41 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
     private final ItemsRepository itemsRepository;
 
 
-    private final Set<Order> ordersQueue=new HashSet<Order>();
-    private Order newOrder=null;
+    private Queue<Order> otherOrdersQueue = new LinkedList<Order>();
+    private Queue<Order> priorityOrdersQueue = new LinkedList<Order>();
+
 
     public OrdersManagementSystemImpl(TaxOfficeAdapter taxOfficeAdapter, ItemsRepository itemsRepository) {
         this.taxOfficeAdapter = taxOfficeAdapter;
         this.itemsRepository = itemsRepository;
     }
 
-    @Override
-    public void createOrder(int itemId, int customerId, OrderFlag... flags) {
 
+    public void createOrder(int itemId, int customerId, OrderFlag... flags) {
         //fetch price and calculate discount and taxes
         BigDecimal itemPrice = itemsRepository.fetchItemPrice(itemId);
 
+        Order newOrder = null;
+
         //create and queue order
-        OrderFlag flag=flags[0];
+        OrderFlag flag = flags[0];
         switch (flag) {
-            case STANDARD: newOrder=new Order(itemId,customerId,itemPrice); break;
-            case PRIORITY: newOrder=new PriorityOrder(itemId,customerId,itemPrice); break;
-            case INTERNATIONAL: newOrder=new InternationalOrder(itemId,customerId,itemPrice); break;
-            case DISCOUNTED: newOrder=new DiscountedOrder(itemId,customerId,itemPrice); break;
-        }
-
-        ordersQueue.add(newOrder);
-
-        //JIRA-18883 Fix priority orders not always being fetched first
-        if (OrderFlag.PRIORITY.equals(flag)) {
-            while (fetchNextOrder()!=newOrder) {
-                ordersQueue.remove(newOrder);
-                newOrder=new PriorityOrder(itemId,customerId,itemPrice);
-                ordersQueue.add(newOrder);
-            }
-            ordersQueue.add(newOrder);
+            case STANDARD:
+                newOrder = new Order(itemId, customerId, itemPrice);
+                otherOrdersQueue.add(newOrder);
+                break;
+            case PRIORITY:
+                newOrder = new PriorityOrder(itemId, customerId, itemPrice);
+                priorityOrdersQueue.add(newOrder);
+                break;
+            case INTERNATIONAL:
+                newOrder = new InternationalOrder(itemId, customerId, itemPrice);
+                otherOrdersQueue.add(newOrder);
+                break;
+            case DISCOUNTED:
+                newOrder = new DiscountedOrder(itemId, customerId, itemPrice);
+                otherOrdersQueue.add(newOrder);
+                break;
         }
 
         //send tax due amount
@@ -57,6 +58,25 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
 
     @Override
     public Order fetchNextOrder() {
-        return ordersQueue.iterator().next();
+
+        if(!priorityOrdersQueue.isEmpty())
+            return priorityOrdersQueue.poll();
+
+        return otherOrdersQueue.poll();
+    }
+
+
+    private class OrdersComparator implements Comparator<Order> {
+
+        public int compare(Order o1, Order o2) {
+
+            int p1 = 1;
+            int p2 = 1;
+
+            if (o1 instanceof PriorityOrder) p1 = 0;
+            if (o2 instanceof PriorityOrder) p2 = 0;
+
+            return Integer.compare(p1, p2);
+        }
     }
 }

@@ -8,16 +8,16 @@ import java.math.BigDecimal;
 import java.util.Random;
 
 public class Order {
-    private final int itemId;//айдишник заказа
-    private final int customerId;//айдишник покупателя
-    private final BigDecimal price;//цена
+    private final int itemId;
+    private final int customerId;
+    private final BigDecimal price;
 
     //for performance reasons lets pre-calculate it in constructor
-    private int preCalculatedHashCode = 0;//вычисление хеша
+    private int preCalculatedHashCode = 0;
 
-    private static final Random random = new Random();//рандомное число
+    private static Random random = new Random();
 
-    public Order(int itemId, int customerId, BigDecimal price) { //конструктор
+    public Order(int itemId, int customerId, BigDecimal price) {
         this.itemId = itemId;
         this.customerId = customerId;
         this.price = price;
