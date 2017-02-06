@@ -1,12 +1,11 @@
 package pl.beutysite.recruit;
 
-import pl.beutysite.recruit.orders.DiscountedOrder;
-import pl.beutysite.recruit.orders.InternationalOrder;
 import pl.beutysite.recruit.orders.Order;
-import pl.beutysite.recruit.orders.PriorityOrder;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class OrdersManagementSystemImpl implements OrdersManagementSystem {
 
@@ -18,42 +17,25 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
     private Queue<Order> otherOrdersQueue = new LinkedList<Order>();
     private Queue<Order> priorityOrdersQueue = new LinkedList<Order>();
 
-
     public OrdersManagementSystemImpl(TaxOfficeAdapter taxOfficeAdapter, ItemsRepository itemsRepository) {
         this.taxOfficeAdapter = taxOfficeAdapter;
         this.itemsRepository = itemsRepository;
     }
 
-
     public void createOrder(int itemId, int customerId, OrderFlag... flags) {
         //fetch price and calculate discount and taxes
         BigDecimal itemPrice = itemsRepository.fetchItemPrice(itemId);
 
-        Order newOrder = null;
+        Order order = new Order(itemId, customerId, itemPrice, flags);
 
-        //create and queue order
-        OrderFlag flag = flags[0];
-        switch (flag) {
-            case STANDARD:
-                newOrder = new Order(itemId, customerId, itemPrice, OrderFlag.STANDARD);
-                otherOrdersQueue.add(newOrder);
-                break;
-            case PRIORITY:
-                newOrder = new PriorityOrder(itemId, customerId, itemPrice, OrderFlag.PRIORITY);
-                priorityOrdersQueue.add(newOrder);
-                break;
-            case INTERNATIONAL:
-                newOrder = new InternationalOrder(itemId, customerId, itemPrice, OrderFlag.INTERNATIONAL);
-                otherOrdersQueue.add(newOrder);
-                break;
-            case DISCOUNTED:
-                newOrder = new DiscountedOrder(itemId, customerId, itemPrice, OrderFlag.DISCOUNTED);
-                otherOrdersQueue.add(newOrder);
-                break;
+        if(Arrays.asList(flags).contains(OrderFlag.PRIORITY)) {
+            priorityOrdersQueue.add(order);
+        } else {
+            otherOrdersQueue.add(order);
         }
 
         //send tax due amount
-        taxOfficeAdapter.registerTax(newOrder.getTax());
+        taxOfficeAdapter.registerTax(order.getTax());
     }
 
     @Override

@@ -1,19 +1,11 @@
 package pl.beutysite.recruit.orders;
 
-import pl.beutysite.recruit.OrderFlag;
 import pl.beutysite.recruit.SeriousEnterpriseEventBus;
 import pl.beutysite.recruit.SeriousEnterpriseEventBusLookup;
-import pl.beutysite.recruit.TaxCalculationsHelper;
 
-import java.math.BigDecimal;
+public class DiscountedOrderProcessor implements OrderProcessor {
 
-public class DiscountedOrder extends Order {
-
-    public DiscountedOrder(int itemId, int customerId, BigDecimal price, OrderFlag type) {
-        super(itemId, customerId, price, type);
-    }
-
-    public void process() {
+    public void process(Order order) {
         SeriousEnterpriseEventBus seeb = SeriousEnterpriseEventBusLookup.seeb;
         seeb.sendEvent("Order processing started");
 

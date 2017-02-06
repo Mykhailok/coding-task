@@ -1,19 +1,23 @@
 package pl.beutysite.recruit;
 
+import pl.beutysite.recruit.orders.*;
+
 import java.math.BigDecimal;
 
 public enum OrderFlag {
-    PRIORITY(new BigDecimal("23.5"), new BigDecimal(100 + 1.5)),
-    DISCOUNTED(new BigDecimal("23.5"), new BigDecimal(100 - 11)),
-    INTERNATIONAL(new BigDecimal("15.0"), new BigDecimal(100)),
-    STANDARD(new BigDecimal("23.5"), new BigDecimal(100));
+    PRIORITY(0, +1.5, new PriorityOrderProcessor()),
+    DISCOUNTED(0, -11, new DiscountedOrderProcessor()),
+    INTERNATIONAL(-8.5, 0, new InternationalOrderProcessor()),
+    STANDARD(0, 0, new StandardOrderProcessor());
 
     private BigDecimal taxPercentage;
     private BigDecimal pricePercentage;
+    private final OrderProcessor orderProcessor;
 
-    OrderFlag(BigDecimal taxPercentage, BigDecimal pricePercentage) {
-        this.taxPercentage = taxPercentage;
-        this.pricePercentage = pricePercentage;
+    OrderFlag(double taxPercentage, double pricePercentage, OrderProcessor orderProcessor) {
+        this.taxPercentage = new BigDecimal(taxPercentage);
+        this.pricePercentage = new BigDecimal(pricePercentage);
+        this.orderProcessor = orderProcessor;
     }
 
     public BigDecimal getTaxPercentage() {
@@ -22,5 +26,9 @@ public enum OrderFlag {
 
     public BigDecimal getPricePercentage() {
         return pricePercentage;
+    }
+
+    public OrderProcessor getOrderProcessor() {
+        return orderProcessor;
     }
 }
