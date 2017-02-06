@@ -1,5 +1,6 @@
 package pl.beutysite.recruit.orders;
 
+import pl.beutysite.recruit.OrderFlag;
 import pl.beutysite.recruit.SeriousEnterpriseEventBus;
 import pl.beutysite.recruit.SeriousEnterpriseEventBusLookup;
 import pl.beutysite.recruit.TaxCalculationsHelper;
@@ -11,16 +12,18 @@ public class Order {
     private final int itemId;
     private final int customerId;
     private final BigDecimal price;
+    private OrderFlag type;
 
     //for performance reasons lets pre-calculate it in constructor
     private int preCalculatedHashCode = 0;
 
     private static Random random = new Random();
 
-    public Order(int itemId, int customerId, BigDecimal price) {
+    public Order(int itemId, int customerId, BigDecimal price, OrderFlag type) {
         this.itemId = itemId;
         this.customerId = customerId;
         this.price = price;
+        this.type = type;
         preCalculatedHashCode = random.nextInt();
     }
 
@@ -32,7 +35,7 @@ public class Order {
     }
 
     public BigDecimal getTotalAmount() {
-        return price.add(getTax());
+        return getPrice().add(getTax());
     }
 
     public int getItemId() {
@@ -44,12 +47,16 @@ public class Order {
     }
 
     public BigDecimal getPrice() {
-        return price;
+        return TaxCalculationsHelper.getPercentagePart(price, getType().getPricePercentage());
+    }
+
+    public OrderFlag getType() {
+        return type;
     }
 
     public BigDecimal getTax() {
         //calculating standard tax - 23.5%
-        return TaxCalculationsHelper.getPercentagePart(getPrice(), new BigDecimal("23.5"));
+        return TaxCalculationsHelper.getPercentagePart(getPrice(), getType().getTaxPercentage());
     }
 
     @Override

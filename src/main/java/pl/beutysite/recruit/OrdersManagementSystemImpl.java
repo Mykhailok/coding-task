@@ -35,19 +35,19 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
         OrderFlag flag = flags[0];
         switch (flag) {
             case STANDARD:
-                newOrder = new Order(itemId, customerId, itemPrice);
+                newOrder = new Order(itemId, customerId, itemPrice, OrderFlag.STANDARD);
                 otherOrdersQueue.add(newOrder);
                 break;
             case PRIORITY:
-                newOrder = new PriorityOrder(itemId, customerId, itemPrice);
+                newOrder = new PriorityOrder(itemId, customerId, itemPrice, OrderFlag.PRIORITY);
                 priorityOrdersQueue.add(newOrder);
                 break;
             case INTERNATIONAL:
-                newOrder = new InternationalOrder(itemId, customerId, itemPrice);
+                newOrder = new InternationalOrder(itemId, customerId, itemPrice, OrderFlag.INTERNATIONAL);
                 otherOrdersQueue.add(newOrder);
                 break;
             case DISCOUNTED:
-                newOrder = new DiscountedOrder(itemId, customerId, itemPrice);
+                newOrder = new DiscountedOrder(itemId, customerId, itemPrice, OrderFlag.DISCOUNTED);
                 otherOrdersQueue.add(newOrder);
                 break;
         }
@@ -63,20 +63,5 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
             return priorityOrdersQueue.poll();
 
         return otherOrdersQueue.poll();
-    }
-
-
-    private class OrdersComparator implements Comparator<Order> {
-
-        public int compare(Order o1, Order o2) {
-
-            int p1 = 1;
-            int p2 = 1;
-
-            if (o1 instanceof PriorityOrder) p1 = 0;
-            if (o2 instanceof PriorityOrder) p2 = 0;
-
-            return Integer.compare(p1, p2);
-        }
     }
 }

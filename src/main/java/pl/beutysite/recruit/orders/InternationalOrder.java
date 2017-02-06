@@ -1,21 +1,16 @@
 package pl.beutysite.recruit.orders;
 
+import pl.beutysite.recruit.OrderFlag;
 import pl.beutysite.recruit.SeriousEnterpriseEventBus;
 import pl.beutysite.recruit.SeriousEnterpriseEventBusLookup;
-import pl.beutysite.recruit.TaxCalculationsHelper;
 
 import java.math.BigDecimal;
 
 //TODO will have more taxes calculated
 public class InternationalOrder extends Order {
 
-    public InternationalOrder(int itemId, int customerId, BigDecimal price) {
-        super(itemId, customerId, price);
-    }
-
-    public BigDecimal getTax() {
-        //calculating international tax - 15.0%
-        return TaxCalculationsHelper.getPercentagePart(getPrice(), new BigDecimal("15.0"));
+    public InternationalOrder(int itemId, int customerId, BigDecimal price, OrderFlag type) {
+        super(itemId, customerId, price, type);
     }
 
     public void process() {

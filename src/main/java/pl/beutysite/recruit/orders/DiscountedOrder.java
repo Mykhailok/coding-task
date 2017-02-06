@@ -1,5 +1,6 @@
 package pl.beutysite.recruit.orders;
 
+import pl.beutysite.recruit.OrderFlag;
 import pl.beutysite.recruit.SeriousEnterpriseEventBus;
 import pl.beutysite.recruit.SeriousEnterpriseEventBusLookup;
 import pl.beutysite.recruit.TaxCalculationsHelper;
@@ -8,14 +9,8 @@ import java.math.BigDecimal;
 
 public class DiscountedOrder extends Order {
 
-    public DiscountedOrder(int itemId, int customerId, BigDecimal price) {
-        super(itemId, customerId, price);
-    }
-
-    @Override
-    public BigDecimal getPrice() {
-        //subtracting standard discount - 11%
-        return TaxCalculationsHelper.subtractPercentage(super.getPrice(), new BigDecimal("11"));
+    public DiscountedOrder(int itemId, int customerId, BigDecimal price, OrderFlag type) {
+        super(itemId, customerId, price, type);
     }
 
     public void process() {
