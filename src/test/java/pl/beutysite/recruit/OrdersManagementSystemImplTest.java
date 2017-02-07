@@ -75,7 +75,7 @@ public class OrdersManagementSystemImplTest {
         given(itemsRepository.fetchItemPrice(2)).willReturn(new BigDecimal("10.00"));
 
         //when
-        ordersManagementSystem.createOrder(2,1,OrderFlag.PRIORITY);
+        ordersManagementSystem.createOrder(2,1,OrderFlag.PRIORITY);//было не рабочее, всегда выбиралась последняя запись, возвращает один и тот же ордер
         ordersManagementSystem.createOrder(1,2,OrderFlag.STANDARD);
         ordersManagementSystem.createOrder(2,3,OrderFlag.PRIORITY);
         ordersManagementSystem.createOrder(1,4,OrderFlag.STANDARD);

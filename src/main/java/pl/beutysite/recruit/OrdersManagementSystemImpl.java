@@ -13,7 +13,7 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
     private final TaxOfficeAdapter taxOfficeAdapter;
     private final ItemsRepository itemsRepository;
 
-
+//priorityOrdersQueue make two Queues because if order have a priority flag, so we add it to priorityOrdersQueue and with other Flags we add them to otherOrdersQueue
     private Queue<Order> otherOrdersQueue = new LinkedList<Order>();
     private Queue<Order> priorityOrdersQueue = new LinkedList<Order>();
 
@@ -39,7 +39,7 @@ public class OrdersManagementSystemImpl implements OrdersManagementSystem {
     }
 
     @Override
-    public Order fetchNextOrder() {
+    public Order fetchNextOrder() {//check is priorityOrdersQueue empty or not
 
         if(!priorityOrdersQueue.isEmpty())
             return priorityOrdersQueue.poll();

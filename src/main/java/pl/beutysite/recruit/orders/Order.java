@@ -25,10 +25,10 @@ public class Order {
         this.customerId = customerId;
         this.price = price;
         this.types = types;
-        preCalculatedHashCode = random.nextInt();
+        preCalculatedHashCode = random.nextInt();//don't know why need this, because system already calculate hash.
     }
 
-    public void process() {
+    public void process() {//get Orders and for each type of order calling this process, like sending emails
         for (OrderFlag type : types) {
             type.getOrderProcessor().process(this);
         }
@@ -48,7 +48,7 @@ public class Order {
 
     public BigDecimal getPrice() {
         BigDecimal percentage = new BigDecimal(100);
-        for (OrderFlag t : types) {
+        for (OrderFlag t : types) {//gathering all values for tax and price per each order, if there is a multi-ordering, so we add taxes from each OrderFlag
             percentage = percentage.add(t.getPricePercentage());
         }
 
